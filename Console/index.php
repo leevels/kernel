@@ -18,29 +18,8 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel\Helper;
+namespace Leevel\Kernel\Console;
 
-use Leevel\Kernel\App as Apps;
-
-/**
- * 返回应用容器或者注入.
- *
- * @param string $service
- * @param array  $args
- *
- * @return \Leevel\Kernel\App|mixed
- */
-function app(?string $service = null, array $args = [])
-{
-    $app = Apps::singletons();
-
-    if (null === $service) {
-        return $app;
-    }
-
-    return $app->make($service, $args);
-}
-
-class app
+class index
 {
 }

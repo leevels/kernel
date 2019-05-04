@@ -18,48 +18,61 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel;
+namespace Leevel\Kernel\Testing;
 
-use Exception;
-use Leevel\Http\IRequest;
-use Leevel\Http\IResponse;
-use Symfony\Component\Console\Output\OutputInterface;
+use Leevel\Kernel\App;
+use PHPUnit\Framework\TestCase as TestCases;
 
 /**
- * 异常接口.
+ * phpunit 基础测试类.
  *
  * @author Xiangmin Liu <635750556@qq.com>
  *
- * @since 2018.04.25
+ * @since 2017.05.08
  *
  * @version 1.0
+ * @codeCoverageIgnore
  */
-interface IRuntime
+abstract class TestCase extends TestCases
 {
-    /**
-     * 异常上报.
-     *
-     * @param \Exception $e
-     *
-     * @return mixed
-     */
-    public function report(Exception $e);
+    use Helper;
 
     /**
-     * 异常渲染.
+     * 创建的应用.
      *
-     * @param \Leevel\Http\IRequest $request
-     * @param \Exception            $e
-     *
-     * @return \Leevel\Http\IResponse
+     * @var \Leevel\Kernel\App
      */
-    public function render(IRequest $request, Exception $e): IResponse;
+    protected $app;
 
     /**
-     * 命令行渲染.
-     *
-     * @param \Symfony\Component\Console\Output\OutputInterface $output
-     * @param \Exception                                        $e
+     * Setup.
      */
-    public function renderForConsole(OutputInterface $output, Exception $e): void;
+    protected function setUp(): void
+    {
+        if (!$this->app) {
+            $this->app = $this->createApp();
+        }
+    }
+
+    /**
+     * tearDown.
+     */
+    protected function tearDown(): void
+    {
+        $this->app = null;
+    }
+
+    /**
+     * 创建日志目录.
+     *
+     * @var array
+     */
+    abstract protected function makeLogsDir(): array;
+
+    /**
+     * 初始化应用.
+     *
+     * @return \Leevel\Kernel\App
+     */
+    abstract protected function createApp(): App;
 }

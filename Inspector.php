@@ -18,29 +18,27 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel\Helper;
+namespace Leevel\Kernel;
 
-use Leevel\Kernel\App as Apps;
+use Whoops\Exception\Inspector as BaseInspector;
 
 /**
- * 返回应用容器或者注入.
+ * Inspector.
  *
- * @param string $service
- * @param array  $args
+ * @author Xiangmin Liu <635750556@qq.com>
  *
- * @return \Leevel\Kernel\App|mixed
+ * @since 2018.05.01
+ *
+ * @version 1.0
+ * @codeCoverageIgnore
  */
-function app(?string $service = null, array $args = [])
+class Inspector extends BaseInspector
 {
-    $app = Apps::singletons();
-
-    if (null === $service) {
-        return $app;
+    /**
+     * {@inheritdoc}
+     */
+    protected function getTrace($e)
+    {
+        return $e->getTrace();
     }
-
-    return $app->make($service, $args);
-}
-
-class app
-{
 }

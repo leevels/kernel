@@ -18,31 +18,52 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel\Facade;
+namespace Leevel\Kernel\Testing;
 
-use Leevel\Kernel\App as Apps;
+use Leevel\Database\Facade\Db;
 
 /**
- * 门面 app.
+ * 数据库助手方法.
  *
  * @author Xiangmin Liu <635750556@qq.com>
  *
- * @since 2018.08.18
+ * @since 2018.11.24
  *
  * @version 1.0
+ * @codeCoverageIgnore
  */
-class App
+trait Database
 {
     /**
-     * call.
+     * 清理数据表.
      *
-     * @param string $method
-     * @param array  $args
-     *
-     * @return mixed
+     * @param array $tables
      */
-    public static function __callStatic(string $method, array $args)
+    protected function truncateDatabase(array $tables): void
     {
-        return Apps::singletons()->{$method}(...$args);
+        if (!$tables) {
+            return;
+        }
+
+        foreach ($tables as $table) {
+            $sql = <<<'eot'
+                [
+                    "TRUNCATE TABLE `%s`",
+                    []
+                ]
+                eot;
+            $this->assertSame(
+                sprintf($sql, $table),
+                $this->varJson(
+                    Db::sql()->
+                    table($table)->
+                    truncate()
+                )
+            );
+
+            Db::table($table)->
+
+            truncate();
+        }
     }
 }

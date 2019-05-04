@@ -18,29 +18,30 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel\Helper;
+namespace Leevel\Kernel\Bootstrap;
 
-use Leevel\Kernel\App as Apps;
+use Leevel\Kernel\IApp;
 
 /**
- * 返回应用容器或者注入.
+ * 遍历服务提供者.
  *
- * @param string $service
- * @param array  $args
+ * @author Xiangmin Liu <635750556@qq.com>
  *
- * @return \Leevel\Kernel\App|mixed
+ * @since 2018.05.02
+ *
+ * @version 1.0
  */
-function app(?string $service = null, array $args = [])
+class TraverseProvider
 {
-    $app = Apps::singletons();
+    /**
+     * 响应.
+     *
+     * @param \Leevel\Kernel\IApp $app
+     */
+    public function handle(IApp $app): void
+    {
+        $app->registerProviders();
 
-    if (null === $service) {
-        return $app;
+        $app->bootstrapProviders();
     }
-
-    return $app->make($service, $args);
-}
-
-class app
-{
 }
