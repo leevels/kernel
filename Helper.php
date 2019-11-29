@@ -18,50 +18,40 @@ declare(strict_types=1);
  * file that was distributed with this source code.
  */
 
-namespace Leevel\Kernel\Testing;
+namespace Leevel\Kernel;
 
-use Leevel\Database\Proxy\Db;
+use function Leevel\Support\Str\un_camelize;
+use Leevel\Support\Str\un_camelize;
 
 /**
- * 数据库助手方法.
+ * 助手类.
  *
  * @author Xiangmin Liu <635750556@qq.com>
  *
- * @since 2018.11.24
+ * @since 2019.08.21
  *
  * @version 1.0
- * @codeCoverageIgnore
  */
-trait Database
+class Helper
 {
     /**
-     * 清理数据表.
+     * call.
      *
-     * @param array $tables
+     * @param string $method
+     * @param array  $args
+     *
+     * @return mixed
      */
-    protected function truncateDatabase(array $tables): void
+    public static function __callStatic(string $method, array $args)
     {
-        if (!$tables) {
-            return;
+        $fn = __NAMESPACE__.'\\Helper\\'.un_camelize($method);
+        if (!function_exists($fn)) {
+            class_exists($fn);
         }
 
-        foreach ($tables as $table) {
-            $sql = <<<'eot'
-                [
-                    "TRUNCATE TABLE `%s`",
-                    []
-                ]
-                eot;
-            $this->assertSame(
-                sprintf($sql, $table),
-                $this->varJson(
-                    Db::sql()
-                        ->table($table)
-                        ->truncate()
-                )
-            );
-
-            Db::table($table)->truncate();
-        }
+        return $fn(...$args);
     }
 }
+
+// import fn.
+class_exists(un_camelize::class);

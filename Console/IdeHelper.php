@@ -20,61 +20,82 @@ declare(strict_types=1);
 
 namespace Leevel\Kernel\Console;
 
+use InvalidArgumentException;
 use Leevel\Console\Argument;
 use Leevel\Console\Command;
-use Leevel\Kernel\IApp;
-use Leevel\Option\IOption;
+use Leevel\Kernel\Utils\ClassParser;
+use Leevel\Kernel\Utils\IdeHelper as UtilsIdeHelper;
 
 /**
- * 解析内部单元测试用例为 Markdown 文档.
+ * IDE 帮助文件自动生成.
  *
  * @author Xiangmin Liu <635750556@qq.com>
  *
- * @since 2019.03.23
+ * @since 2019.08.31
  *
  * @version 1.0
  * @codeCoverageIgnore
  */
-class DocFramework extends Command
+class IdeHelper extends Command
 {
     /**
      * 命令名字.
      *
      * @var string
      */
-    protected string $name = 'make:docwithin';
+    protected $name = 'make:idehelper';
 
     /**
      * 命令行描述.
      *
      * @var string
      */
-    protected string $description = 'Markdown generation based on within test cases';
+    protected $description = 'IDE helper generation';
 
     /**
      * 响应命令.
-     *
-     * @param \Leevel\Kernel\IApp    $app
-     * @param \Leevel\Option\IOption $option
      */
-    public function handle(IApp $app, IOption $option): void
+    public function handle(): void
     {
-        $input = [
-            'path'      => $this->path(),
-            'testsdir'  => $app->path('vendor/hunzhiwange/framework/tests'),
-            'outputdir' => $option->get('console\\framework_doc_outputdir'),
-            'git'       => $option->get('console\\framework_doc_git'),
-        ];
+        $className = $this->parseClassName($this->path());
+        $classContent = (new UtilsIdeHelper())->handle($className);
 
-        $i18n = explode(',', $option->get('console\\framework_doc_i18n'));
-        foreach ($i18n as $v) {
-            $input['--i18n'] = $v;
-            $this->call('make:doc', $input);
-        }
+        echo PHP_EOL;
+        echo $classContent;
+        echo PHP_EOL.PHP_EOL;
+
+        $message = sprintf('The @method for Class <comment>%s</comment> generate succeed.', $className);
+        $this->info($message);
     }
 
     /**
-     * 取得测试用例文件或者目录相对路径.
+     * 分析类名.
+     *
+     * @param string $pathOrClassName
+     *
+     * @throws \InvalidArgumentException
+     *
+     * @return string
+     */
+    protected function parseClassName(string $pathOrClassName): string
+    {
+        if (class_exists($pathOrClassName) || interface_exists($pathOrClassName)) {
+            return $pathOrClassName;
+        }
+
+        if (!is_file($pathOrClassName)) {
+            $e = sprintf('File `%s` is not exits.', $pathOrClassName);
+
+            throw new InvalidArgumentException($e);
+        }
+
+        $className = (new ClassParser())->handle($pathOrClassName);
+
+        return $className;
+    }
+
+    /**
+     * 取得路径.
      *
      * @return string
      */
@@ -94,7 +115,7 @@ class DocFramework extends Command
             [
                 'path',
                 Argument::REQUIRED,
-                'This is the tests file or dir path.',
+                'This is the source file path or class name.',
             ],
         ];
     }
