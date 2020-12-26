@@ -10,28 +10,28 @@ use Leevel\Filesystem\Helper\link;
 use Leevel\Kernel\IApp;
 
 /**
- * Swagger UI 文档目录创建软连接.
+ * 附件目录创建软连接.
  */
-class LinkApis extends Command
+class LinkAttachments extends Command
 {
     /**
      * 命令名字.
     */
-    protected string $name = 'link:apis';
+    protected string $name = 'link:attachments';
 
     /**
      * 命令行描述.
     */
-    protected string $description = 'Create a symbolic link from `assets/apis` to `www/apis` and `apis`';
+    protected string $description = 'Create a symbolic link from `storage/attachments` to `www/attachments` and `attachments`';
 
     /**
      * 响应命令.
      */
     public function handle(IApp $app): int
     {
-        $source = $app->path('assets/apis');
-        $this->createLink($source, $app->path('www/apis'));
-        $this->createLink($source, $app->path('apis'));
+        $source = $app->runtimePath('attachments');
+        $this->createLink($source, $app->path('www/attachments'));
+        $this->createLink($source, $app->path('attachments'));
 
         return 0;
     }
