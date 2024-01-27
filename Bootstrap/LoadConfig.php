@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace Leevel\Kernel\Bootstrap;
 
+use Leevel\Config\Config;
+use Leevel\Config\Env;
+use Leevel\Config\IConfig;
+use Leevel\Config\Load;
 use Leevel\Kernel\IApp;
-use Leevel\Option\Env;
-use Leevel\Option\IOption;
-use Leevel\Option\Load;
-use Leevel\Option\Option;
 
 /**
  * 载入配置.
  */
-class LoadOption
+class LoadConfig
 {
     use Env;
 
@@ -24,27 +24,27 @@ class LoadOption
     {
         $this->checkRuntimeEnv($app);
 
-        if ($app->isCachedOption()) {
-            $data = (array) include $app->optionCachedPath();
+        if ($app->isCachedConfig()) {
+            $data = (array) include $app->configCachedPath();
             $this->setEnvVars($data['app'][':env'], function (string $name, null|bool|string $value = null): void {
                 // 保持和 Dotenv 兼容
                 $_SERVER[$name] = $_ENV[$name] = $value;
             });
         } else {
-            $load = new Load($app->optionPath());
+            $load = new Load($app->configPath());
             $data = $load->loadData($app);
         }
 
         $app
             ->container()
-            ->instance('option', $option = new Option($data))
+            ->instance('config', $config = new Config($data))
         ;
         $app
             ->container()
-            ->alias('option', [IOption::class, Option::class])
+            ->alias('config', [IConfig::class, Config::class])
         ;
 
-        $this->initialization($option);
+        $this->initialization($config);
     }
 
     /**
@@ -71,20 +71,20 @@ class LoadOption
      *
      * @codeCoverageIgnore
      */
-    protected function initialization(Option $option): void
+    protected function initialization(Config $config): void
     {
         mb_internal_encoding('UTF-8');
 
         if (\function_exists('date_default_timezone_set')) {
             // @phpstan-ignore-next-line
-            date_default_timezone_set($option->get('time_zone', 'UTC'));
+            date_default_timezone_set($config->get('time_zone', 'UTC'));
         }
 
         if (\PHP_SAPI === 'cli') {
             return;
         }
 
-        if (\function_exists('gz_handler') && $option->get('start_gzip')) {
+        if (\function_exists('gz_handler') && $config->get('start_gzip')) {
             // @phpstan-ignore-next-line
             ob_start('gz_handler');
         } else {
